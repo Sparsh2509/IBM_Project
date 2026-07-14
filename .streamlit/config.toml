@@ -1,0 +1,22 @@
+[server]
+# Run without opening a browser tab — mandatory for Docker/cloud
+headless = true
+
+# Bind to all network interfaces so Docker can route traffic in
+address = "0.0.0.0"
+
+# Port that AWS App Runner and docker run -p 8501:8501 will target
+port = 8501
+
+# Disable CORS protection — App Runner handles TLS/routing externally
+enableCORS = false
+
+# Disable XSRF — not needed behind App Runner's load balancer
+enableXsrfProtection = false
+
+# Disable the file watcher in Docker to prevent unnecessary scans and torchvision warnings
+fileWatcherType = "none"
+
+[browser]
+# Prevent Streamlit from auto-opening a browser inside the container
+gatherUsageStats = false
