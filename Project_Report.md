@@ -4,131 +4,162 @@
 ---
 
 ### **Project Metadata**
-* **Project Title:** AI Email Copilot (RAG-Powered Custom Email Generator)
-* **Unique Team ID:** IBMBH00696
-* **Team Name:** GEN CREW
-* **Team Leader Name:** Sparsh Gupta
-* **Total Team Members:** 5
+* **Application Name:** AI Email Copilot
+* **Domain:** Artificial Intelligence | Generative AI | Cloud Computing
+* **Submitted To:** IBM SkillsBuild / Project Evaluation Committee
+* **Prepared By:** Team GEN CREW (Unique ID: IBMBH00696)
 * **College Name:** AJAY KUMAR GARG ENGINEERING COLLEGE
+* **Submission Date:** July 2026
 * **Live UI Link:** [https://ibmproject-gruy5zavcwsnugwcwwx9js.streamlit.app/](https://ibmproject-gruy5zavcwsnugwcwwx9js.streamlit.app/)
 * **Live REST API Link:** [http://Ai-email-copilot-env.eba-qtnai9na.us-east-1.elasticbeanstalk.com](http://Ai-email-copilot-env.eba-qtnai9na.us-east-1.elasticbeanstalk.com)
 
 ---
 
-## 1. Abstract
-The **AI Email Copilot** is a state-of-the-art enterprise productivity tool designed to automate the creation of context-aware, highly personalized professional emails. Traditional LLM-based prompt generators often suffer from inconsistencies in tone, layout, and phrasing. To solve this, our project implements **Retrieval-Augmented Generation (RAG)** by coupling a fast local vector search engine (**FAISS**) with state-of-the-art Generative AI models from Google. 
+## 1. Executive Summary & Abstract
+The AI Email Copilot is a production-grade enterprise application built to optimize corporate and administrative email communications. While common Large Language Models (LLMs) can generate text in response to simple prompts, they frequently exhibit formatting drift, hallucinated templates, and lack contextual grounding in specific domain norms.
 
-The architecture is divided into a robust backend REST API hosted on **AWS Elastic Beanstalk (AL2023)** and an interactive frontend UI hosted on **Streamlit Cloud**. Through the use of Google's high-dimensional `gemini-embedding-2` model and the latest `gemini-3.5-flash` model, this project achieves high-speed processing, absolute deployment stability, and zero local memory footprint, making it fully eligible for free-tier cloud architectures.
+To address this bottleneck, our system implements a hybrid Retrieval-Augmented Generation (RAG) pattern. It stores a vetted collection of standard email templates in a local FAISS vector database. When a user creates a generation query, the system retrieves the most contextually relevant templates using high-speed cosine vector match, injects the examples directly into a prompt template, and invokes the latest Google Gemini LLM API.
 
----
-
-## 2. Introduction & Objectives
-Writing emails in professional, administrative, and corporate settings requires exact tones, appropriate context, and structured layouts. The objectives of this project are:
-1. **Consistency:** Ensure generated emails adhere to vetted organizational templates.
-2. **Context-Awareness:** Allow users to specify names, purposes, companies, and custom key points, which are automatically blended into the final output.
-3. **Multi-Platform Deployment:** Build a production-grade decoupled system where the backend engine (FastAPI) and frontend (Streamlit) communicate securely over HTTP.
-4. **Cloud-Native & Resource Optimized:** Deploy the backend on AWS Elastic Beanstalk using free-tier instances (t3.micro) with low CPU and memory footprints.
+The complete system is decoupled into a backend FastAPI REST server deployed on AWS Elastic Beanstalk (Amazon Linux 2023, t3.micro) and an interactive frontend UI hosted on Streamlit Cloud, achieving high scalability and memory optimizations.
 
 ---
 
-## 3. Solution Architecture & System Design
-Our architecture is split into a **decidedly decoupled frontend-backend model** to ensure scalability and reliability:
+## 2. Introduction
+In modern education and corporate settings, drafting effective professional emails (e.g. cold outreach, follow ups, and internship applications) is vital. However, many users struggle with formatting, appropriate language levels, and structural alignments.
 
-### **Data Flow Architecture**
-```
-[User Input via Streamlit UI]
-           │
-           ▼ (HTTP POST /generate-email JSON Payload)
-   [FastAPI Backend Server on AWS Elastic Beanstalk]
-           │
-           ├─► [Gemini Embeddings API (gemini-embedding-2)] ──► Convert query to 3072-D vector
-           │
-           ├─► [Local FAISS DB Vector Similarity Search] ──► Retrieve top relevant templates
-           │
-           └─► [Gemini 3.5 Flash LLM] ──► Generate final response with templates as context
-           │
-           ▼ (JSON HTTP Response)
-[Streamlit UI displays generated output]
-```
-
-### **Core Components**
-1. **Vectorization Engine (`rag/build_vectorstore.py`):** Loads sample email templates from the raw text directory, splits the documents into chunks, generates 3072-dimensional embeddings via Gemini API, and saves a local binary vector index using FAISS.
-2. **Search & Retrieval (`rag/retriever.py`):** Runs online vector searches to fetch contextually similar email structures to guide the generator.
-3. **Prompt Engineer (`prompts/email_prompt.py`):** Combines the retrieved templates, user-provided sender/recipient details, tone constraints, length specifications, and custom bullet points into a structured system instruction prompt.
-4. **REST Web Server (`api.py`):** A FastAPI wrapper running on Uvicorn that exposes the entire pipeline over a public POST API endpoint.
-5. **Interactive UI Client (`streamlit_app.py`):** A web-based application utilizing Streamlit to gather user inputs and interact with the live AWS backend.
+This project outlines a scalable design to generate localized custom professional emails on demand. Key features include user-defined sender/recipient parameters, company contexts, customizable key bullet points, custom tone parameters, and text length limits. The design leverages Google's serverless embedding architectures to construct vector spaces at zero runtime memory overhead.
 
 ---
 
-## 4. Technical Specifications & Cloud Infrastructure
-
-* **Programming Language:** Python 3.11
-* **Backend Framework:** FastAPI, Uvicorn (WSGI/ASGI runner)
-* **Frontend Framework:** Streamlit
-* **RAG Orchestrator:** LangChain (LangChain-Community, LangChain-Core)
-* **Vector Store:** FAISS (CPU variant)
-* **Embedding Model:** Google Generative AI Embeddings (`gemini-embedding-2`)
-* **Generation Model:** Google Gemini (`gemini-3.5-flash`)
-* **Backend Cloud Host:** AWS Elastic Beanstalk (Running Python 3.11 on 64-bit Amazon Linux 2023, t3.micro instance)
-* **Frontend Cloud Host:** Streamlit Cloud (Auto-syncing from GitHub repository)
+## 3. Problem Statement
+The primary difficulties in automating professional email communications are as follows:
+* **Generic LLM Responses:** Standard prompt-based generators lack specialized organizational context, leading to repetitive or shallow email copy.
+* **Inconsistent Styling:** LLMs are prone to structural drifts, occasionally omitting necessary elements like subject lines or formal signatures.
+* **High Memory Requirements:** Conventional RAG pipelines running local open-source transformer models require substantial local RAM (typically >1GB), making deployment on lightweight free-tier cloud servers impossible.
+* **Deployment Failures:** Many cloud services fail to host heavy containerized environments due to strict memory limit constraints.
 
 ---
 
-## 5. Implementation Challenges & Resolutions
-During the development and cloud deployment lifecycle, the team encountered several major engineering roadblocks which were successfully resolved:
-
-1. **Memory Exhaustion (OOM) on AWS t3.micro Free Tier:**
-   * *Problem:* Initially, PyTorch and Hugging Face's local `sentence-transformers` were used for embeddings. This resulted in an enormous memory footprint (>1.2 GB RAM) during builds/runtime, immediately causing the 1GB RAM t3.micro instance on AWS to freeze and crash.
-   * *Resolution:* Migrated from local PyTorch embeddings to Google's cloud-hosted **`gemini-embedding-2`** API. This eliminated the PyTorch and local model dependencies entirely, reducing memory utilization by over 90% and speeding up index load times to milliseconds.
-2. **Windows vs. Linux ZIP Packaging Mismatch:**
-   * *Problem:* Standard Windows zip utilities create paths with backslashes (`\`), which cause unzip extraction failures on the Amazon Linux platform during deployment.
-   * *Resolution:* Used `git archive` to package code, ensuring Unix-compatible forward-slash (`/`) directory paths.
-3. **AWS Elastic Beanstalk Procfile Parsing Failure:**
-   * *Problem:* Procfiles created on Windows contain CRLF (`\r\n`) endings and trailing empty lines which break the Beanstalk process manager engine during environment startup.
-   * *Resolution:* Re-wrote the Procfile natively with exactly one line using binary Unix LF (`\n`) encoding.
-4. **Streamlit Cloud Environment Secrets Fetching:**
-   * *Problem:* Streamlit Cloud does not automatically bind TOML secrets to environment variables accessed via `os.getenv`.
-   * *Resolution:* Updated code to dynamically query `st.secrets.get()` as a fallback configuration for `API_URL` and `GEMINI_API_KEY`.
+## 4. Project Objectives
+The key objectives driving the engineering lifecycle of this system include:
+1. **Context Grounding:** Build a retrieval mechanism that forces the LLM generator to align with pre-approved corporate layouts.
+2. **API Decoupling:** Architect a public REST endpoint using FastAPI to handle vector database search and generation logic independently of the client interface.
+3. **Performance Optimizations:** Structure memory-efficient configurations to run the complete FastAPI application in cloud environments using less than 100MB RAM.
+4. **Seamless UI Connection:** Bind the frontend Streamlit application dynamically to the cloud REST service via secure HTTP requests.
 
 ---
 
-## 6. Verification & Test Case Outputs
-Below is a verification test run executed against the live **AWS Elastic Beanstalk REST API**:
+## 5. RAG System Design & Advantages
+Instead of fine-tuning the model or relying on plain prompts, our project implements Retrieval-Augmented Generation (RAG). The RAG design brings distinct advantages:
 
-### **HTTP POST Payload Sent:**
-```json
-{
-  "sender_name": "Sparsh",
-  "recipient_name": "Harsh",
-  "company_name": "IBM",
-  "purpose": "follow up",
-  "tone": "professional",
-  "length": "short",
-  "key_points": ["Hi", "Checking in on the project status"]
-}
-```
+### **A. Reduced Hallucination**
+By injecting real templates as a reference context, the LLM generates drafts closely matching verified business communication standards.
 
-### **REST API Status Return:**
-`200 OK`
+### **B. Easy Knowledge Updates**
+Vetted email templates can be added or modified instantly in the text directory. The system simply rebuilds the vector index without requiring expensive retraining or fine-tuning cycles.
 
-### **Generated Email Output Received:**
-```text
-Subject: Follow-Up: Project Status
+### **C. Dense Vector Representation**
+Using Google's `gemini-embedding-2` API, the documents are transformed into dense 3072-dimensional floating-point vectors, capturing detailed semantics for accurate template matching.
 
-Dear Harsh,
+### **D. Efficient Vector Space**
+The FAISS database handles fast similarity calculations locally, scanning vectors in microseconds.
 
-I hope you are having a productive week. I am writing to check in on our project's status and see if there are any updates from your side. Please let me know if you need any additional information or support from my end to help move things forward.
+---
 
-Best regards,
-Sparsh
+## 6. Backend Implementation & Vector Search
+The backend is written in FastAPI and uses LangChain to connect FAISS with the Gemini model. Below is the core implementation of the retriever module (`rag/retriever.py`):
+
+```python
+import os
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.vectorstores import FAISS
+
+load_dotenv()
+
+# Load embedding model
+embeddings = GoogleGenerativeAIEmbeddings(
+    model='models/gemini-embedding-2',
+    google_api_key=os.getenv('GEMINI_API_KEY')
+)
+
+# Load FAISS vector database index
+vectorstore = FAISS.load_local(
+    'faiss_index',
+    embeddings,
+    allow_dangerous_deserialization=True
+)
+
+retriever = vectorstore.as_retriever(search_kwargs={'k': 2})
+
+def retrieve_context(query: str) -> str:
+    docs = retriever.invoke(query)
+    return '\n\n'.join([doc.page_content for doc in docs])
 ```
 
 ---
 
-## 7. Conclusion & Future Enhancements
-The **AI Email Copilot** successfully demonstrates how RAG architectures can optimize prompt engineering for professional communications. By moving memory-intensive vectorization and generation tasks to secure cloud APIs, and keeping deployment configurations clean, the project achieves production-grade efficiency entirely on a zero-cost budget.
+## 7. Frontend UI Design & Flow
+The frontend is implemented in `streamlit_app.py`. It provides a simple, clean form interface to collect user inputs. Instead of direct function calls, the UI calls the backend REST API over HTTP, allowing total decoupling.
 
-### **Future Roadmap:**
-* **Multimodal Inputs:** Expanding RAG to support parsing PDF/Doc attachment prompts using Gemini multimodal architectures.
-* **Auto-drafting Extensions:** Building chrome/outlook extensions that hook the FastAPI REST API directly into GMail and Outlook mail composers.
-* **User Feedback Loops:** Logging generated email modifications to continuously fine-tune similarity scores in the FAISS vector database.
+Below is a code listing showing how Streamlit handles API communication:
+
+```python
+import streamlit as st
+import requests
+import os
+
+# Resolve backend URL using env var or Streamlit Cloud Secrets
+API_URL = os.getenv('API_URL') or st.secrets.get('API_URL') or 'http://localhost:8000'
+
+with st.form('email_form'):
+    sender = st.text_input('Sender Name')
+    recipient = st.text_input('Recipient Name')
+    purpose = st.selectbox('Purpose', ['cold email', 'internship request'])
+    key_points = st.text_area('Key Points')
+    submit = st.form_submit_button('Generate Email')
+
+if submit:
+    response = requests.post(
+        f'{API_URL}/generate-email',
+        json={
+            'sender_name': sender,
+            'recipient_name': recipient,
+            'key_points': key_points.split('\n')
+            # other inputs...
+        }
+    )
+    st.write(response.json()['data']['email'])
+```
+
+---
+
+## 8. AWS Elastic Beanstalk Deployment
+The backend API is hosted on AWS Elastic Beanstalk using Python 3.11 running on 64-bit Amazon Linux 2023. The deployment process handles dependency installation and process management automatically.
+
+* **Requirements Merging:** To ensure all FastAPI and LangChain packages are installed during startup, we merged backend dependencies into `requirements.txt`. This allows AWS EB to install libraries in the virtual environment natively.
+* **Nginx Proxy Configuration:** AWS Elastic Beanstalk sets up an Nginx reverse proxy server by default. We bound Uvicorn to run on port 8000 via our Procfile to perfectly match the Nginx default proxy routing rules.
+* **Procfile Structure:** Our Procfile specifies the WSGI process startup command and uses a single Unix-native newline (LF) to prevent platform extraction failures:
+  ```text
+  web: uvicorn api:app --host 0.0.0.0 --port 8000
+  ```
+
+---
+
+## 9. Streamlit User Interface screenshots
+The active user interface screenshots hosted on Streamlit Cloud are compiled in the PDF version of this report. 
+
+* **Input Page:** Captures email metadata (Sender, Recipient, Company, Purpose, Tone, Length, and Key Points).
+* **Output Page:** Renders the contextually matched retrieved text structured and generated via Google Gemini 3.5 Flash.
+
+---
+
+## 10. Security, Scaling & Conclusion
+
+### **A. Secrets and Security Management**
+API keys are loaded securely as AWS Elastic Beanstalk environment variables, preventing sensitive tokens from leaking in source code. On Streamlit Cloud, keys are bound securely in the encrypted secrets dashboard.
+
+### **B. Scaling and Load Optimization**
+By utilizing serverless endpoints for both model embeddings and generation text, the AWS backend instance is only responsible for handling HTTP routing and FAISS index similarity scans. This architecture allows the application to scale efficiently without rising CPU/RAM usage.
+
+### **C. Final Conclusion**
+The AI Email Copilot project successfully delivers a production-grade, decoupled cloud application. By coupling local vector databases with hosted LLMs, the system achieves RAG-grounded formatting accuracy, establishing a stable template generator tool for AICTE | IBM project submission guidelines.
