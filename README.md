@@ -1,163 +1,90 @@
 # 📧 AI Email Copilot using RAG
 
 An AI-powered Email Generator built using **Retrieval-Augmented Generation (RAG)**.  
-By combining semantic template retrieval via Hugging Face embeddings with the reasoning power of Google Gemini, this system crafts highly personalized, context-aware professional emails tailored to any specific scenario, role, or tone.
+By combining semantic template retrieval via Google Gemini Embeddings with the reasoning power of the latest Google Gemini LLM, this system crafts highly personalized, context-aware professional emails tailored to any specific scenario, role, or tone.
 
-Live UI Demo: [https://aiemailgeneratorusingrag-lfcvucjigqzpjmza3ruhhg.streamlit.app/](https://aiemailgeneratorusingrag-lfcvucjigqzpjmza3ruhhg.streamlit.app/) 
-
-Live REST API: [https://ai-email-generator-using-rag.onrender.com](https://ai-email-generator-using-rag.onrender.com)
+* **Live UI Demo (Streamlit Cloud):** [https://ibmproject-gruy5zavcwsnugwcwwx9js.streamlit.app/](https://ibmproject-gruy5zavcwsnugwcwwx9js.streamlit.app/) 
+* **Live REST API (AWS Elastic Beanstalk):** [http://Ai-email-copilot-env.eba-qtnai9na.us-east-1.elasticbeanstalk.com](http://Ai-email-copilot-env.eba-qtnai9na.us-east-1.elasticbeanstalk.com)
 
 ---
 
 ## 🚀 Features
 
-- Generate professional emails (Cold Email, Internship Request, Follow-up, Apology, Sales Outreach)
-- Context-aware generation using RAG
-- Semantic template retrieval using FAISS
-- HuggingFace embeddings (all-MiniLM-L6-v2)
-- Gemini 2.5 Flash Lite for generation
-- Interactive Streamlit UI
-- Deployed on Streamlit Cloud
+- **Personalized Email Generation:** Generate highly targeted professional emails (Cold Email, Internship Request, Follow-up, Apology, Sales Outreach).
+- **RAG-Powered:** Retrieve the most contextually relevant email templates from a local knowledge base to inject formatting & tone guidelines into the generator.
+- **Fast FAISS Index:** Search and fetch semantic templates via highly efficient local FAISS vector search.
+- **Gemini Embedding API:** Utilizes `gemini-embedding-2` for 3072-dimensional semantic search with zero local resource/RAM overhead.
+- **Gemini 3.5 Flash Model:** Generates highly structured, natural, and tone-accurate copy.
+- **FastAPI Layer:** Backend RAG pipeline exposed as REST endpoint and hosted on AWS Elastic Beanstalk (AL2023).
 
 ---
 
 ## 🏗 Architecture
 
-User Input  
-↓  
-Generate Semantic Query  
-↓  
-HuggingFace Embeddings  
-↓  
-FAISS Vector Search  
-↓  
-Retrieve Top-K Templates  
-↓  
-Inject Context into Prompt  
-↓  
-Gemini LLM Generates Email  
+```
+User Input (UI / API Request)
+        ↓
+Generate Semantic Query
+        ↓
+Google Gemini Embeddings (3072-D)
+        ↓
+FAISS Vector Similarity Search
+        ↓
+Retrieve Top-K Context Templates
+        ↓
+Inject Context & Structuring into Prompt Template
+        ↓
+Google Gemini 3.5 Flash LLM Generates Final Email
+```
 
 ---
 
 ## 🛠 Tech Stack
 
-- Python
-- Streamlit
-- LangChain
-- HuggingFace Embeddings
-- FAISS Vector Database
-- Google Gemini API
-- dotenv
-- FastAPI (REST API)
-- Postman (API Testing)
+- **Python**
+- **Streamlit** (Frontend UI)
+- **FastAPI** (REST Backend API)
+- **LangChain** (RAG Orchestration)
+- **Google Gemini Embeddings** (`gemini-embedding-2`)
+- **FAISS** (Local Vector Database)
+- **Google Gemini LLM** (`gemini-3.5-flash`)
+- **AWS Elastic Beanstalk** (Cloud Hosting for FastAPI API)
 
 ---
 
 ## 📂 Project Structure
 
-
 ```
 AI_Email_Generator/
 │
-├── streamlit_app.py            # Streamlit UI for generating emails using Gemini API
+├── streamlit_app.py            # Streamlit UI for generating emails via Live AWS API
 ├── app.py                      # CLI-based email generation interface
+├── api.py                      # FastAPI REST endpoint exposing RAG pipeline
 │
 ├── rag/
-│   ├── build_vectorstore.py    # Creates hugging face embeddings and builds FAISS vector index
-│   ├── retriever.py            # Retrieves top relevant email templates using semantic search
+│   ├── build_vectorstore.py    # Builds FAISS vector index using Google GenAI embeddings
+│   ├── retriever.py            # Handles vector search to retrieve relevant email templates
 │
 ├── prompts/
-│   ├── email_prompt.py         # Builds structured prompt using user input + retrieved context to 
-│                               # control and formatt LLM output
+│   ├── email_prompt.py         # Builds structured instruction prompt for Gemini LLM
 │
-├── Email_Templates_idea/       # Collection of sample email templates for RAG knowledge base
-│
-├── faiss_index/                # Stored FAISS vector database files
-├── requirements.txt            # Project dependencies
-├── api.py                      # FastAPI REST endpoint to expose RAG pipeline
+├── Email_Templates_idea/       # Raw knowledge base of custom email templates
+├── faiss_index/                # Stored FAISS binary vector database index files
+├── requirements.txt            # Main Streamlit Cloud dependencies
+├── requirements-api.txt        # Lightweight FastAPI dependencies for AWS EB
+├── Procfile                    # Tells AWS Elastic Beanstalk how to run the FastAPI app
 └── README.md                   # Project documentation
 ```
 
 ---
 
-## ⚙ How It Works
+## 🔌 REST API (AWS Elastic Beanstalk)
 
-1. User enters:
-   - Sender name
-   - Recipient name
-   - Company name
-   - Purpose
-   - Tone
-   - Key points
+The RAG pipeline is exposed as a live REST API endpoint hosted on AWS Elastic Beanstalk.
 
-2. System:
-   - Converts query into embeddings
-   - Retrieves similar email templates from FAISS
-   - Injects context into structured prompt
-   - Gemini generates final email
+* **Live Endpoint:** `http://Ai-email-copilot-env.eba-qtnai9na.us-east-1.elasticbeanstalk.com/generate-email`
 
-This ensures more structured and consistent output compared to plain prompt-based generation.
-
----
-
-## 📥 Sample Request
-
-Below is an example user input provided through the UI:
-
-```
-Sender Name: Sparsh
-Recipient Name: HR Manager
-Company Name: ABC Technologies
-Purpose: Internship Request
-Tone: Professional
-Length: Medium
-Key Points:
-- Built RAG systems
-- Strong in Python
-- Passionate about AI
-```
-
----
-
-## 📤 Sample Response
-
-```
-Subject: Application for AI Internship Opportunity
-
-Dear HR Manager,
-
-I hope this message finds you well.
-
-My name is Sparsh, and I am writing to express my strong interest in internship opportunities at ABC Technologies. I have been following your innovative work in the AI space and greatly admire your commitment to building impactful technology solutions.
-
-I have hands-on experience building Retrieval-Augmented Generation (RAG) systems and possess strong proficiency in Python. My passion for artificial intelligence drives me to continuously learn and contribute meaningfully to challenging projects.
-
-I would welcome the opportunity to further discuss how I can contribute to your team. Thank you for your time and consideration.
-
-Best regards,
-Sparsh
-```
-
----
-
-## 🔌 REST API
-
-A FastAPI layer was built to expose the RAG pipeline as a REST endpoint.
-
-### Live API Endpoint (Render)
-You can test the API directly via POST request at:
-`https://ai-email-generator-using-rag.onrender.com/generate-email`
-
-### Run API Locally
-```bash
-uvicorn api:app --reload
-```
-
-### Endpoint
-
-`POST /generate-email`
-
-### Request Body
+### Request Body (`POST`)
 ```json
 {
   "sender_name": "Sparsh Gupta",
@@ -170,64 +97,36 @@ uvicorn api:app --reload
 }
 ```
 
-### Response
+### Response Body
 ```json
 {
   "success": true,
   "data": {
-    "email": "Subject: Internship Inquiry - AI and Python Expertise\n\nDear HR Manager,\n\nI am writing to express my enthusiastic interest in internship opportunities at ABC Technologies, particularly within roles that leverage artificial intelligence. My academic and personal projects have provided me with practical experience in developing robust RAG (Retrieval-Augmented Generation) systems, a field I find incredibly dynamic and promising. I am confident that my foundational knowledge and hands-on experience in building these sophisticated AI architectures align well with the innovative work being done at your company.\n\nMy technical proficiency is strongly rooted in Python, a language I have utilized extensively for data manipulation, algorithm implementation, and the development of complex AI applications. I am passionate about the transformative potential of AI and am eager to contribute my skills to a forward-thinking organization like ABC Technologies. I am keen to learn from experienced professionals and gain invaluable real-world exposure in a challenging and rewarding environment.\n\nThank you for considering my application. I have attached my resume for your review and welcome the opportunity to discuss how my skills and passion for AI can benefit ABC Technologies.\n\nBest regards,\nSparsh Gupta"
+    "email": "Subject: Internship Inquiry - AI and Python Expertise\n\nDear HR Manager,\n\nI am writing to express my enthusiastic interest in internship opportunities at ABC Technologies..."
   }
 }
 ```
----
-
-## 🔎 What Makes This Response Context-Aware?
-
-- The system retrieves similar internship email templates from the FAISS vector database.
-- Relevant tone and structure are injected into the prompt.
-- Gemini 2.5 Flash Lite generates the final structured email.
 
 ---
 
 ## 🧪 Run Locally
 
-### Clone Repository
-
+### 1. Clone & Set Up Directory
 ```bash
-git clone https://github.com/Sparsh2509/AI_Email_Generator_Using_Rag.git
-cd AI_Email_Generator_Using_Rag
+git clone https://github.com/Sparsh2509/IBM_Project.git
+cd IBM_Project
 ```
 
-### Create Virtual Environment
+### 2. Configure Environment Variables
+Create a `.env` file in the root directory:
+```env
+GEMINI_API_KEY="your_google_gemini_api_key"
+```
 
+### 3. Run Streamlit UI Locally
 ```bash
 python -m venv venv
-venv\Scripts\activate
-```
-
-### Install Dependencies
-
-```bash
+source venv/bin/activate  # On Windows use: .\venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### Environment Variables
-
-Create a `.env` file in the root of project and add API keys. We use the Hugging Face Serverless Inference API to handle embeddings with zero local memory cost.
-
-```env
-GEMINI_API_KEY="google_gemini_token"
-HF_TOKEN="huggingface_token"
-```
-> **Important:**Hugging Face token must have the **"Make calls to the serverless Inference API"** permission enabled.
-
-
-### Run Streamlit App
-
-```bash
 streamlit run streamlit_app.py
 ```
-
-
-
-
