@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+langchain
+langchain-core
+langchain-google-genai
+langchain-community
+langchain-text-splitters
+google-generativeai
+faiss-cpu
+python-dotenv
+pydantic
+requests
