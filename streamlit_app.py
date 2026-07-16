@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# FastAPI backend URL — reads from env var (set in Streamlit Cloud secrets)
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+# FastAPI backend URL — reads from env var or streamlit secrets
+API_URL = os.getenv("API_URL") or st.secrets.get("API_URL") or "http://localhost:8000"
 
 st.set_page_config(page_title="AI Email Copilot", page_icon="📧")
 
