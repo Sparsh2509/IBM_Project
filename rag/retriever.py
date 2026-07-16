@@ -8,7 +8,7 @@ load_dotenv()
 # Use GoogleGenerativeAIEmbeddings (Gemini) instead of HuggingFace.
 # This solves Hugging Face API connection and DNS resolution issues on AWS EB.
 embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-004",
+    model="models/gemini-embedding-2",
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
 

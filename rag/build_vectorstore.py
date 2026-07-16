@@ -29,9 +29,9 @@ def build_vectorstore():
 
     split_docs = splitter.split_documents(docs)
 
-    # Use GoogleGenerativeAIEmbeddings (Gemini text-embedding-004) to match the retriever
+    # Use GoogleGenerativeAIEmbeddings (Gemini gemini-embedding-2) to match the retriever
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-2",
         google_api_key=os.getenv("GEMINI_API_KEY")
     )
 
